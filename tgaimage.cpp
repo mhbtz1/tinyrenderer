@@ -59,7 +59,53 @@ bool TGAImage::read_tga_file(const char* filename) {
     if (!fin.good() ){
         std::cerr << "Stream is not in a condition for reading from disk!" << std::endl;
     }
+    width = hdr.width;
+	height = hdr.height;
+	bytespp = hdr.bitsperpixel>>3;
+	if (width<=0 || height<=0 || (bytespp!=GRAYSCALE && bytespp!=RGB && bytespp!=RGBA)) {
+		fin.close();
+		std::cerr << "bad bpp (or width/height) value\n";
+		return false;
+	}
+	unsigned long nbytes = bytespp*width*height;
+	data = new unsigned char[nbytes];
+	if (3==hdr.datatypecode || 2==hdr.datatypecode) {
+		fin.read((char *)data, nbytes);
+		if (!in.good()) {
+			in.close();
+			std::cerr << "an error occured while reading the data\n";
+			return false;
+		}
+	} else if (10==hdr.datatypecode||11==hdr.datatypecode) {
+		if (!load_rle_data(fin)) {
+			fin.close();
+			std::cerr << "an error occured while reading the data\n";
+			return false;
+		}
+	} else {
+		fin.close();
+		std::cerr << "unknown file format " << (int)hdr.datatypecode << "\n";
+		return false;
+	}
+	if (!(hdr.imagedescriptor & 0x20)) {
+		flip_vertically();
+	}
+	if (hdr.imagedescriptor & 0x10) {
+		flip_horizontally();
+	}
+	std::cerr << width << "x" << height << "/" << bytespp*8 << "\n";
+	fin.close();
+	return true;
+}
 
+bool TGAImage::load_rle_data(std::ifstream& in){
+
+}
+bool TGAImage::write_tga_file(const char* filename, bool rle=true) {
+
+}
+bool TGAImage::unload_rle_data(std::ofstream& out){
+    
 }
 
 void line(int x0, int y0, int x1, int y1, TGAImage& image, TGAColor color) {
