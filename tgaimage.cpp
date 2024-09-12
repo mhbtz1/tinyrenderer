@@ -352,15 +352,35 @@ bool TGAImage::scale(int w, int h) {
 	return true;
 }
 
-static void line(int x0, int y0, int x1, int y1, TGAImage& image, TGAColor color) {
+static void line(Vec2i start, Vec2i end, TGAImage& image, TGAColor color) {
+    int x0 = start.x;
+    int y0 = start.y;
+    int x1 = end.x;
+    int y1 = end.y;
     for (float f = 0; f < 1; f += 0.01) {
         float xp = x0 + (x1 - x0) * f;
         float yp = y0 + (y1 - y0) * f;
+        std::cout << xp << " " << yp << std::endl;
         image.set(xp, yp, color);
     }
 }
 
+static void draw_triangle(Triangle& t, TGAImage& image, TGAColor cols[]) {
+    line(t.vertices[0], t.vertices[1], image, cols[0]);
+    line(t.vertices[1], t.vertices[2], image, cols[1]);
+    line(t.vertices[2], t.vertices[0], image, cols[2]);
+}
+
 
 int main() {
-    
+    TGAImage image(100, 100, TGAImage::Format::RGB);
+    TGAImage& imageRef = image;
+    TGAColor color({255, 255, 0, 0});
+
+    Triangle t( { Vec2i{ x: -10, -10}, Vec2i{x: 0, y: 0}, Vec2i{-10, 0}} );
+    TGAColor cols[] = { color, color, color };
+    draw_triangle(t, image, cols);
+    image.write_tga_file("tga_triangle.tga");
+
+
 }

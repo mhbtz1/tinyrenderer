@@ -20,7 +20,14 @@ struct TGA_Header {
 };
 #pragma pack(pop)
 
+struct Vec2i {
+    int x;
+    int y;
+};
 
+struct Triangle {
+    Vec2i vertices[3];
+};
 
 struct TGAColor {
 	union {
